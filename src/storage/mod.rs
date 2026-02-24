@@ -19,17 +19,20 @@ impl Storage {
         Self::Redis(RedisStorage::new(connection_manager))
     }
 
-    pub async fn put(&self, key: impl Into<String>, value: impl Into<String>) {
+    pub async fn put(&self, id: impl Into<String>, url: impl Into<String>) -> crate::Result<()> {
         match self {
-            Self::Memory(storage) => storage.put(key, value).await,
-            Self::Redis(storage) => storage.put(key, value).await,
+            Self::Memory(storage) => {
+                storage.put(id, url).await;
+                Ok(())
+            }
+            Self::Redis(storage) => storage.put(id, url).await,
         }
     }
 
-    pub async fn get(&self, key: impl AsRef<str>) -> Option<String> {
+    pub async fn get(&self, id: impl AsRef<str>) -> crate::Result<Option<String>> {
         match self {
-            Self::Memory(storage) => storage.get(key).await,
-            Self::Redis(storage) => storage.get(key).await,
+            Self::Memory(storage) => Ok(storage.get(id).await),
+            Self::Redis(storage) => storage.get(id).await,
         }
     }
 }

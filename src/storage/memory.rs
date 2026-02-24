@@ -12,11 +12,11 @@ impl MemoryStorage {
         }
     }
 
-    pub async fn put(&self, key: impl Into<String>, value: impl Into<String>) {
-        self.storage.insert(key.into(), value.into()).await
+    pub async fn put(&self, id: impl Into<String>, url: impl Into<String>) {
+        self.storage.insert(id.into(), url.into()).await
     }
 
-    pub async fn get(&self, key: impl AsRef<str>) -> Option<String> {
-        self.storage.get(key.as_ref()).await
+    pub async fn get(&self, id: impl AsRef<str>) -> Option<String> {
+        self.storage.get(id.as_ref()).await
     }
 }

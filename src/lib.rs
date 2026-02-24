@@ -1,10 +1,12 @@
 #![deny(warnings)]
 
+mod error;
 mod storage;
 
 use tracing::debug;
 use uuid::Uuid;
 
+pub use error::*;
 use storage::*;
 
 #[derive(Debug, Clone)]
@@ -30,17 +32,17 @@ impl UrlShortener {
         base62::encode(id.as_u128())
     }
 
-    pub async fn create(&self, url: impl Into<String>) -> String {
+    pub async fn create(&self, url: impl Into<String>) -> crate::Result<String> {
         let url = url.into();
         let id = Self::gen_id();
         debug!("generated new id {} for {}", id, url);
 
-        self.storage.put(id.clone(), url).await;
+        self.storage.put(id.clone(), url).await?;
 
-        id
+        Ok(id)
     }
 
-    pub async fn get(&self, hash: impl AsRef<str>) -> Option<String> {
+    pub async fn get(&self, hash: impl AsRef<str>) -> crate::Result<Option<String>> {
         debug!("looking up {}", hash.as_ref());
         self.storage.get(hash).await
     }
@@ -59,10 +61,10 @@ mod test {
 
         let shortener = UrlShortener::new_memory();
 
-        let id = shortener.create(url).await;
+        let id = shortener.create(url).await.unwrap();
         assert!(!id.is_empty());
 
-        let lookup = shortener.get(&id).await;
+        let lookup = shortener.get(&id).await.unwrap();
         assert_eq!(lookup, Some(url.to_string()));
     }
 }
