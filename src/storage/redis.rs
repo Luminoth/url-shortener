@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+
+#[derive(Debug, Clone)]
 pub struct RedisStorage {
     connection_manager: redis::aio::ConnectionManager,
 }
@@ -7,11 +10,11 @@ impl RedisStorage {
         Self { connection_manager }
     }
 
-    pub fn put(&self, key: impl Into<String>, value: impl Into<String>) -> Option<String> {
+    pub async fn put(&self, _key: impl Into<String>, _value: impl Into<String>) {
         todo!()
     }
 
-    pub fn get(&self, key: impl AsRef<str>) -> Option<String> {
+    pub async fn get(&self, _key: impl AsRef<str>) -> Option<String> {
         todo!()
     }
 }

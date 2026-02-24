@@ -4,6 +4,7 @@ mod redis;
 use memory::*;
 use redis::*;
 
+#[derive(Debug, Clone)]
 pub enum Storage {
     Memory(MemoryStorage),
     Redis(RedisStorage),
@@ -18,17 +19,17 @@ impl Storage {
         Self::Redis(RedisStorage::new(connection_manager))
     }
 
-    pub fn put(&self, key: impl Into<String>, value: impl Into<String>) -> Option<String> {
+    pub async fn put(&self, key: impl Into<String>, value: impl Into<String>) {
         match self {
-            Self::Memory(storage) => storage.put(key, value),
-            Self::Redis(storage) => storage.put(key, value),
+            Self::Memory(storage) => storage.put(key, value).await,
+            Self::Redis(storage) => storage.put(key, value).await,
         }
     }
 
-    pub fn get(&self, key: impl AsRef<str>) -> Option<String> {
+    pub async fn get(&self, key: impl AsRef<str>) -> Option<String> {
         match self {
-            Self::Memory(storage) => storage.get(key),
-            Self::Redis(storage) => storage.get(key),
+            Self::Memory(storage) => storage.get(key).await,
+            Self::Redis(storage) => storage.get(key).await,
         }
     }
 }

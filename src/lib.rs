@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 
 mod storage;
 
@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use storage::*;
 
+#[derive(Debug, Clone)]
 pub struct UrlShortener {
     storage: Storage,
 }
@@ -29,19 +30,19 @@ impl UrlShortener {
         base62::encode(id.as_u128())
     }
 
-    pub fn create(&self, url: impl Into<String>) -> String {
+    pub async fn create(&self, url: impl Into<String>) -> String {
         let url = url.into();
         let id = Self::gen_id();
         debug!("generated new id {} for {}", id, url);
 
-        self.storage.put(id.clone(), url);
+        self.storage.put(id.clone(), url).await;
 
         id
     }
 
-    pub fn get(&self, hash: impl AsRef<str>) -> Option<String> {
+    pub async fn get(&self, hash: impl AsRef<str>) -> Option<String> {
         debug!("looking up {}", hash.as_ref());
-        self.storage.get(hash)
+        self.storage.get(hash).await
     }
 }
 
@@ -51,17 +52,17 @@ mod test {
 
     use super::*;
 
-    #[test]
+    #[tokio::test]
     #[traced_test]
-    fn test_create() {
+    async fn test_create() {
         let url = "http://test.com/";
 
         let shortener = UrlShortener::new_memory();
 
-        let id = shortener.create(url);
+        let id = shortener.create(url).await;
         assert!(!id.is_empty());
 
-        let lookup = shortener.get(&id);
+        let lookup = shortener.get(&id).await;
         assert_eq!(lookup, Some(url.to_string()));
     }
 }

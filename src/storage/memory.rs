@@ -1,22 +1,22 @@
-use std::cell::RefCell;
-use std::collections::HashMap;
+use moka::future::Cache;
 
+#[derive(Debug, Clone)]
 pub struct MemoryStorage {
-    storage: RefCell<HashMap<String, String>>,
+    storage: Cache<String, String>,
 }
 
 impl MemoryStorage {
     pub fn new() -> Self {
         Self {
-            storage: RefCell::new(HashMap::new()),
+            storage: Cache::builder().build(),
         }
     }
 
-    pub fn put(&self, key: impl Into<String>, value: impl Into<String>) -> Option<String> {
-        self.storage.borrow_mut().insert(key.into(), value.into())
+    pub async fn put(&self, key: impl Into<String>, value: impl Into<String>) {
+        self.storage.insert(key.into(), value.into()).await
     }
 
-    pub fn get(&self, key: impl AsRef<str>) -> Option<String> {
-        self.storage.borrow().get(key.as_ref()).cloned()
+    pub async fn get(&self, key: impl AsRef<str>) -> Option<String> {
+        self.storage.get(key.as_ref()).await
     }
 }
